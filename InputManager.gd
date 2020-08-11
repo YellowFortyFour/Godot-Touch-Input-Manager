@@ -58,14 +58,31 @@ func _unhandled_input(event):
 			last_mouse_press = event
 		else:
 			last_mouse_press = null
-		
-	elif event is InputEventMouseMotion:
+	elif event is InputEventMagnifyGesture:
+		if event.factor > 1:
+			emit("pinch", InputEventScreenPinch.new({
+					"position": event.position,
+					"distance": 200.0,
+					"relative": 4.0,
+					"speed"	 : 25.0
+				}))
+			#last_mouse_press = event
+		else:
+			emit("pinch", InputEventScreenPinch.new({
+					"position": event.position,
+					"distance": 200.0,
+					"relative": -4.0,
+					"speed"	 : 25.0
+				}))
+			#last_mouse_press = event
+
+	if event is InputEventMouseMotion:
 		if last_mouse_press:
-			if last_mouse_press.button_index == BUTTON_MIDDLE:
+			if last_mouse_press.button_index == BUTTON_RIGHT:
 				emit("multi_drag", InputEventMultiScreenDrag.new({"position": event.position,
-																  "relative": event.relative,
-																  "speed": event.speed}))
-			elif last_mouse_press.button_index == BUTTON_RIGHT:
+																	"relative": event.relative,
+																	"speed": event.speed}))
+			elif last_mouse_press.button_index == BUTTON_MIDDLE:
 				var rel1 = event.position - last_mouse_press.position
 				var rel2 = rel1 + event.relative
 				emit("twist", InputEventScreenTwist.new({"position": last_mouse_press.position,
@@ -90,7 +107,7 @@ func _unhandled_input(event):
 			drags.erase(event.get_index())
 			cancel_single_drag()
 		
-	elif event is InputEventScreenDrag:
+	if event is InputEventScreenDrag:
 		drags[event.index] = event
 		if !complex_gesture_in_progress():
 			if(drag_enabled):
